@@ -29,21 +29,22 @@ function ab_wp_baby_food() {
 		'not_found_in_trash'  => __( 'No Food found in Trash', 'wp_baby_diversification' ),
 	);
 	$args = array(
-		'label'               => __( 'food', 'wp_baby_diversification' ),
-		'description'         => __( 'fisrt baby food', 'wp_baby_diversification' ),
-		'labels'              => $labels,
-		'supports'            => array( 'title', 'editor', 'author', 'revisions', ),
-		'hierarchical'        => false,
-		'public'              => true,
-		'show_ui'             => true,
-		'show_in_menu'        => true,
-		'show_in_nav_menus'   => true,
-		'show_in_admin_bar'   => true,
-		'can_export'          => true,
-		'has_archive'         => false,
-		'exclude_from_search' => true,
-		'publicly_queryable'  => true,
-		'capability_type'     => 'post',
+		'label'                 => __( 'food', 'wp_baby_diversification' ),
+		'description'           => __( 'fisrt baby food', 'wp_baby_diversification' ),
+		'labels'                => $labels,
+		'supports'              => array( 'title', 'editor', 'author', 'revisions', ),
+		'hierarchical'          => false,
+		'register_meta_box_cb'  => 'ab_food_metabox',
+		'public'                => true,
+		'show_ui'               => true,
+		'show_in_menu'          => true,
+		'show_in_nav_menus'     => true,
+		'show_in_admin_bar'     => true,
+		'can_export'            => true,
+		'has_archive'           => false,
+		'exclude_from_search'   => true,
+		'publicly_queryable'    => true,
+		'capability_type'       => 'post',
 	);
 	register_post_type( 'food', $args );
 
@@ -76,3 +77,65 @@ function ab_wp_baby_food() {
 
 // Hook into the 'init' action
 add_action( 'init', 'ab_wp_baby_food', 0 );
+
+// Add the food metabox
+function ab_food_metabox(){
+	add_meta_box(
+                    'ab_food_meta',
+                    __( 'Food meta', 'wp_baby_diversification' ),
+                    'ab_food_meta_content',
+                    'food',
+                    'normal',
+                    'high'
+    );
+}
+
+// Food metabox content display
+function ab_food_meta_content(){
+	$food_meta = get_post_meta( get_the_ID() , 'ab_food_meta', true);
+	$date = isset( $food_meta['first-date'] ) ? $food_meta['first-date'] : '';
+
+	// Use nonce for verification
+    wp_nonce_field( plugin_basename( __FILE__ ), 'ab_food_meta_nonce' );
+
+    ?>
+    <table class="form-table">
+    	<tbody>
+    		<tr>
+    			<th>
+    				<label for="ab_food_meta_date">
+    					<?php  _e("First time date", 'wp_baby_diversification' ); ?>
+    				</label>
+    			</th>
+    			<td>
+    				<input type="date" id="ab_food_meta_date" name="ab_food_meta[first-date]" value="<?php echo $date; ?>" />
+    			</td>
+    		</tr>
+    	</tbody>
+    </table>
+   	<?php
+}
+
+/**
+ * Save the food metabox
+ * @param  int $post_id
+ */
+function ab_save_food_metabox( $post_id ) {
+
+    // verify this came from the our screen and with proper authorization,
+    if ( isset( $_POST['ab_food_meta_nonce'] ) && wp_verify_nonce( $_POST['ab_food_meta_nonce'], plugin_basename( __FILE__ ) ) ){
+
+        // Check permissions
+        if ( current_user_can( 'edit_page', $post_id ) ){
+
+            //update post meta
+            if( isset( $_POST['ab_food_meta']['first-date'] ) ){
+            	$food_meta['first-date'] = esc_attr( $_POST['ab_food_meta']['first-date'] );
+                update_post_meta($post_id, 'ab_food_meta', $food_meta);
+            }
+
+        }
+
+    }
+}
+add_action( 'save_post', 'ab_save_food_metabox' );
