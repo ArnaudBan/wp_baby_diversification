@@ -92,8 +92,9 @@ function ab_food_metabox(){
 
 // Food metabox content display
 function ab_food_meta_content(){
-	$food_meta = get_post_meta( get_the_ID() , 'ab_food_meta', true);
-	$date = isset( $food_meta['first-date'] ) ? $food_meta['first-date'] : '';
+	$food_meta = get_post_meta( get_the_ID() , 'ab_food_meta_first_date', true);
+
+	$date = $food_meta ? $food_meta : '';
 
 	// Use nonce for verification
     wp_nonce_field( plugin_basename( __FILE__ ), 'ab_food_meta_nonce' );
@@ -108,7 +109,7 @@ function ab_food_meta_content(){
     				</label>
     			</th>
     			<td>
-    				<input type="date" id="ab_food_meta_date" name="ab_food_meta[first-date]" value="<?php echo $date; ?>" />
+    				<input type="date" id="ab_food_meta_date" name="ab_food_meta_first_date" value="<?php echo $date; ?>" />
     			</td>
     		</tr>
     	</tbody>
@@ -129,9 +130,9 @@ function ab_save_food_metabox( $post_id ) {
         if ( current_user_can( 'edit_page', $post_id ) ){
 
             //update post meta
-            if( isset( $_POST['ab_food_meta']['first-date'] ) ){
-            	$food_meta['first-date'] = esc_attr( $_POST['ab_food_meta']['first-date'] );
-                update_post_meta($post_id, 'ab_food_meta', $food_meta);
+            if( isset( $_POST['ab_food_meta_first_date'] ) ){
+            	$food_meta_date = esc_attr( $_POST['ab_food_meta_first_date'] );
+                update_post_meta($post_id, 'ab_food_meta_first_date', $food_meta_date);
             }
 
         }
