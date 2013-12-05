@@ -92,9 +92,8 @@ function ab_food_metabox(){
 
 // Food metabox content display
 function ab_food_meta_content(){
-	$food_meta = get_post_meta( get_the_ID() , 'ab_food_meta_first_date', true);
-
-	$date = $food_meta ? $food_meta : '';
+	$food_meta_date = get_post_meta( get_the_ID() , 'ab_food_meta_first_date', true);
+	$food_meta_note = get_post_meta( get_the_ID() , 'ab_food_meta_note', true);
 
 	// Use nonce for verification
     wp_nonce_field( plugin_basename( __FILE__ ), 'ab_food_meta_nonce' );
@@ -109,7 +108,17 @@ function ab_food_meta_content(){
     				</label>
     			</th>
     			<td>
-    				<input type="date" id="ab_food_meta_date" name="ab_food_meta_first_date" value="<?php echo $date; ?>" />
+    				<input type="date" id="ab_food_meta_date" name="ab_food_meta_first_date" value="<?php if( $food_meta_date ) echo $food_meta_date; ?>" />
+    			</td>
+    		</tr>
+    		<tr>
+    			<th>
+    				<label for="ab_food_meta_note">
+    					<?php  _e("Baby's appreciation", 'wp_baby_diversification' ); ?>
+    				</label>
+    			</th>
+    			<td>
+    				<input type="number" id="ab_food_meta_note" name="ab_food_meta_note" min="0" max="5" value="<?php if( $food_meta_note ) echo $food_meta_note; ?>" />
     			</td>
     		</tr>
     	</tbody>
@@ -133,6 +142,12 @@ function ab_save_food_metabox( $post_id ) {
             if( isset( $_POST['ab_food_meta_first_date'] ) ){
             	$food_meta_date = esc_attr( $_POST['ab_food_meta_first_date'] );
                 update_post_meta($post_id, 'ab_food_meta_first_date', $food_meta_date);
+            }
+            if( isset( $_POST['ab_food_meta_note'] ) && is_numeric( $_POST['ab_food_meta_note'] )){
+            	$food_meta_note = intval( $_POST['ab_food_meta_note'] );
+            	if ( $food_meta_note < 0 ) $food_meta_note = 0; 
+            	if ( $food_meta_note > 5 ) $food_meta_note = 5; 
+                update_post_meta($post_id, 'ab_food_meta_note', $food_meta_note);
             }
 
         }
