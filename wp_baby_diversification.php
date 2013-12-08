@@ -46,7 +46,7 @@ function ab_wp_baby_food() {
 		'publicly_queryable'    => true,
 		'capability_type'       => 'post',
 	);
-	register_post_type( 'food', $args );
+	register_post_type( 'baby-food', $args );
 
 	$labels = array(
 		'name'              => _x( 'Classifications', 'taxonomy general name' , 'wp_baby_diversification' ),
@@ -71,7 +71,7 @@ function ab_wp_baby_food() {
 		'rewrite'           => array( 'slug' => 'classification' ),
 	);
 
-	register_taxonomy( 'classification', array( 'food' ), $args );
+	register_taxonomy( 'classification', array( 'baby-food' ), $args );
 
 }
 
@@ -84,7 +84,7 @@ function ab_food_metabox(){
                     'ab_food_meta',
                     __( 'Food meta', 'wp_baby_diversification' ),
                     'ab_food_meta_content',
-                    'food',
+                    'baby-food',
                     'normal',
                     'high'
     );
@@ -155,3 +155,89 @@ function ab_save_food_metabox( $post_id ) {
     }
 }
 add_action( 'save_post', 'ab_save_food_metabox' );
+
+
+/**
+ * Display all the baby food
+ */
+function ab_display_baby_food_table( $attr ){
+
+	$baby_food_query_args = array(
+			'post_type'      => 'baby-food',
+			'posts_per_page' => -1,
+			'post_meta' => 'ab_food_meta_first_date',
+			'orderby' => 'meta_key',
+			'order' => 'DESC',
+		);
+
+	$baby_food = new WP_Query( $baby_food_query_args );
+
+	$baby_food_table = '';
+
+	if( $baby_food->have_posts() ){
+
+		$baby_food_table .= '<table>';
+		
+		$baby_food_table .= '<tbody>';
+		$baby_food_table .= '<tr>';
+
+		$baby_food_table .= '<th>';
+		$baby_food_table .= __('Food', 'wp_baby_diversification');
+		$baby_food_table .= '</th>';
+
+		$baby_food_table .= '<th>';
+		$baby_food_table .= __('First taste date', 'wp_baby_diversification');
+		$baby_food_table .= '</th>';
+
+		$baby_food_table .= '<th>';
+		$baby_food_table .= __('Note', 'wp_baby_diversification');
+		$baby_food_table .= '</th>';
+
+		$baby_food_table .= '<th>';
+		$baby_food_table .= __('Comment', 'wp_baby_diversification');
+		$baby_food_table .= '</th>';
+
+		$baby_food_table .= '</tr>';
+
+
+		while ( $baby_food->have_posts()) {
+			$baby_food->the_post();
+			$baby_food_table .= '<tr>';
+
+			$baby_food_table .= '<td>';
+			$baby_food_table .= get_the_title();
+			$baby_food_table .= '</td>';
+
+			$baby_food_table .= '<td>';
+
+			$the_first_taste_date = get_post_meta( get_the_ID(), 'ab_food_meta_first_date', true );
+
+			if( $the_first_taste_date ){
+				$baby_food_table .= mysql2date( get_option( 'date_format' ), $the_first_taste_date );
+			}
+			$baby_food_table .= '</td>';
+
+			$baby_food_table .= '<td>';
+			$baby_food_table .= get_post_meta( get_the_ID(), 'ab_food_meta_note', true );
+			$baby_food_table .= '</td>';
+
+			$baby_food_table .= '<td>';
+			$baby_food_table .= get_the_content();
+			$baby_food_table .= '</td>';
+
+			$baby_food_table .= '</tr>';
+			
+		}
+
+		wp_reset_postdata();
+		$baby_food_table .= '</tbody>';
+
+
+
+		$baby_food_table .= '</table>';
+	}
+
+	return $baby_food_table;
+
+}
+add_shortcode( 'baby-food', 'ab_display_baby_food_table' );
