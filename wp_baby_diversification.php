@@ -32,7 +32,7 @@ function ab_wp_baby_food() {
 		'label'                 => __( 'food', 'wp_baby_diversification' ),
 		'description'           => __( 'fisrt baby food', 'wp_baby_diversification' ),
 		'labels'                => $labels,
-		'supports'              => array( 'title', 'editor', 'author', 'revisions', ),
+		'supports'              => array( 'title', 'editor', 'author', 'revisions', 'thumbnail'),
 		'hierarchical'          => false,
 		'register_meta_box_cb'  => 'ab_food_metabox',
 		'public'                => true,
